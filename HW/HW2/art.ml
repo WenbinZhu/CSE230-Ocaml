@@ -19,7 +19,25 @@
    the expression.
 *)
 
-let rec build (rand,depth) = failwith "to be implemented"
+let rec build (rand,depth) = 
+  let choice = rand (0, 7) in
+
+  if depth <= 0 then (
+    let bin = rand (0, 2) in
+    if bin = 0 then buildX()
+    else buildY()
+  )
+  else (
+    match choice with
+    | 0 | 1 -> build (rand, depth - 1)
+    | 2 -> buildSine (build (rand, depth - 1))
+    | 3 -> buildCosine (build (rand, depth - 1))
+    | 4 -> buildAverage (build (rand, depth - 1), build (rand, depth - 1))
+    | 5 -> buildTimes (build (rand, depth - 1), build (rand, depth - 1))
+    | 6 -> buildThresh (build (rand, depth - 1), build (rand, depth - 1), build (rand, depth - 1), build (rand, depth - 1))
+    | _ -> build (rand, depth - 1)
+  )
+
 
 let rec build2 (rand,depth) = failwith "to be implemented"
 
