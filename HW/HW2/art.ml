@@ -20,26 +20,41 @@
 *)
 
 let rec build (rand,depth) = 
-  let choice = rand (0, 7) in
-
   if depth <= 0 then (
     let bin = rand (0, 2) in
     if bin = 0 then buildX()
     else buildY()
   )
   else (
+    let choice = rand (0, 7) in
     match choice with
-    | 0 | 1 -> build (rand, depth - 1)
-    | 2 -> buildSine (build (rand, depth - 1))
-    | 3 -> buildCosine (build (rand, depth - 1))
-    | 4 -> buildAverage (build (rand, depth - 1), build (rand, depth - 1))
-    | 5 -> buildTimes (build (rand, depth - 1), build (rand, depth - 1))
-    | 6 -> buildThresh (build (rand, depth - 1), build (rand, depth - 1), build (rand, depth - 1), build (rand, depth - 1))
+    | 0 -> buildSine (build (rand, depth - 1))
+    | 1 -> buildCosine (build (rand, depth - 1))
+    | 2 -> buildAverage (build (rand, depth - 1), build (rand, depth - 1))
+    | 3 -> buildTimes (build (rand, depth - 1), build (rand, depth - 1))
+    | 4 -> buildThresh (build (rand, depth - 1), build (rand, depth - 1), build (rand, depth - 1), build (rand, depth - 1))
     | _ -> build (rand, depth - 1)
   )
 
 
-let rec build2 (rand,depth) = failwith "to be implemented"
+let rec build2 (rand,depth) =
+    if depth <= 0 then (
+      let bin = rand (0, 2) in
+      if bin = 0 then buildX()
+      else buildY()
+    )
+    else (
+      let choice = rand (0, 10) in
+      match choice with
+      | 0 -> buildSine (build2 (rand, depth - 1))
+      | 1 -> buildCosine (build2 (rand, depth - 1))
+      | 2 -> buildAverage (build2 (rand, depth - 1), build2 (rand, depth - 1))
+      | 3 -> buildTimes (build2 (rand, depth - 1), build2 (rand, depth - 1))
+      | 4 -> buildThresh (build2 (rand, depth - 1), build2 (rand, depth - 1), build2 (rand, depth - 1), build2 (rand, depth - 1))
+      | 5 -> buildMax (build2 (rand, depth - 1), build2 (rand, depth - 1))
+      | 6 -> buildGeoMean (build2 (rand, depth - 1), build2 (rand, depth - 1), build2 (rand, depth - 1))
+      | _ -> build2 (rand, depth - 1)
+    )
 
 (* Please fill in ALL of g1,g2,g3,c1,c2,c3 regardless of whether you
  * are aiming for extra credit. 
@@ -51,13 +66,13 @@ let rec build2 (rand,depth) = failwith "to be implemented"
  * they should return (depth,seed1,seed2)
  *)
 
-let g1 () = failwith "to be implemented"  
-let g2 () = failwith "to be implemented"  
-let g3 () = failwith "to be implemented"  
+let g1 () = (10, 32, 262)
+let g2 () = (10, 201, 113)
+let g3 () = (12, 77, 51)
 
-let c1 () = failwith "to be implemented"
-let c2 () = failwith "to be implemented" 
-let c3 () = failwith "to be implemented" 
+let c1 () = (9, 43, 64)
+let c2 () = (10, 7, 22)
+let c3 () = (10, 136, 136)
 
 (**** You should not need to modify any code below here ****)
 

@@ -19,7 +19,9 @@ type expr =
   | Cosine   of expr
   | Average  of expr * expr
   | Times    of expr * expr
-  | Thresh   of expr * expr * expr * expr	
+  | Thresh   of expr * expr * expr * expr
+  | Max      of expr * expr
+  | GeoMean  of expr * expr * expr
 
 
 (* exprToString : expr -> string
@@ -38,6 +40,9 @@ let rec exprToString e =
   | Times (exp1, exp2) -> (exprToString exp1) ^ "*" ^ (exprToString exp2)
   | Thresh (exp1, exp2, exp3, exp4) -> "(" ^ (exprToString exp1) ^ "<" ^ (exprToString exp2) ^ 
                                        "?" ^ (exprToString exp3) ^ ":" ^ (exprToString exp4) ^ ")"
+  | Max (exp1, exp2) -> "max(" ^ (exprToString exp1) ^ "," ^ (exprToString exp2) ^ ")"
+  | GeoMean (exp1, exp2, exp3) -> "((" ^ (exprToString exp1) ^ "*" ^ (exprToString exp2) ^ "*" ^
+                                  (exprToString exp3) ^ ")^(1/3))"
 
 (* build functions:
      Use these helper functions to generate elements of the expr
@@ -51,6 +56,8 @@ let buildCosine(e)                 = Cosine(e)
 let buildAverage(e1,e2)            = Average(e1,e2)
 let buildTimes(e1,e2)              = Times(e1,e2)
 let buildThresh(a,b,a_less,b_less) = Thresh(a,b,a_less,b_less)
+let buildMax(e1,e2)                = Max(e1,e2)
+let buildGeoMean(e1,e2,e3)         = GeoMean(e1,e2,e3)
 
 
 let pi = 4.0 *. atan 1.0
@@ -68,9 +75,12 @@ let rec eval (e,x,y) =
   | VarY -> y
   | Sine exp -> sin (pi *. eval (exp, x, y))
   | Cosine exp -> cos (pi *. eval (exp, x, y))
-  | Average (exp1, exp2) -> (eval(exp1, x, y) +. eval(exp2, x, y)) /. 2.0
-  | Times (exp1, exp2) -> eval(exp1, x, y) *. eval(exp2, x, y)
-  | Thresh (exp1, exp2, exp3, exp4) -> if eval(exp1, x, y) < eval(exp2, x, y) then eval(exp3, x, y) else eval(exp4, x, y)
+  | Average (exp1, exp2) -> (eval (exp1, x, y) +. eval (exp2, x, y)) /. 2.
+  | Times (exp1, exp2) -> eval (exp1, x, y) *. eval (exp2, x, y)
+  | Thresh (exp1, exp2, exp3, exp4) -> if eval (exp1, x, y) < eval (exp2, x, y) then eval (exp3, x, y) else eval (exp4, x, y)
+  | Max (exp1, exp2) -> let a = eval (exp1, x, y) in let b = eval (exp2, x, y) in if a >= b then a else b
+  | GeoMean (exp1, exp2, exp3) -> let v = eval (exp1, x, y) *. eval (exp2, x, y) *. eval (exp3, x, y) in
+                                  if v >= 0. then v ** (1. /. 3.) else -1. *. ((abs_float v) ** (1. /. 3.))
 
 
 (* (eval_fn e (x,y)) evaluates the expression e at the point (x,y) and then
