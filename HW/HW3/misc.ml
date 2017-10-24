@@ -29,15 +29,32 @@
 (******************* 1. Warm Up   ********************************)
 (*****************************************************************)
 
+(* sqsum : int list -> int
+ * 
+ * Returns the sqaured sum of the input int list
+ *)
+
 let sqsum xs = 
   let f a x = a + x * x in
   let base = 0 in
     List.fold_left f base xs
 
+(* pipe : ('a -> 'a) list -> ('a -> 'a)
+ * 
+ * Takes a list of functions [f1;...;fn] and return a piped function 
+ * call on any x: fn(...(f2(f1 x))).
+ *)
+
 let pipe fs = 
   let f a x = fun v -> x (a v) in
   let base = fun v -> v in
     List.fold_left f base fs
+
+(* sepConcat : string -> string list -> string
+ * 
+ * Takes a string separator and a string list, concatenates the strings
+ * in the list by the separator.
+ *)
 
 let rec sepConcat sep sl = match sl with 
   | [] -> ""
@@ -53,6 +70,11 @@ let stringOfList f l = "[" ^ (sepConcat "; " (List.map f l)) ^ "]"
 (******************* 2. Big Numbers ******************************)
 (*****************************************************************)
 
+(* clone : 'a -> int -> 'a list
+ *
+ * Clone x for n times as a list
+ *)
+
 let rec clone x n = 
   match n <= 0 with 
   | true  -> []
@@ -62,10 +84,20 @@ let rec padZero l1 l2 =
   let d = List.length l1 - List.length l2 in
   (List.append (clone 0 (-d)) l1, List.append (clone 0 d) l2)
 
+(* removeZero : int list -> int list
+ *
+ * Remove a prefix of trailing zeros in the list
+ *)
+
 let rec removeZero l = 
   match l with
   | [] -> []
   | h :: t -> if h = 0 then removeZero t else l
+
+(* bigAdd : int list -> int list -> int list
+ * 
+ * Add two big integers represented as int lists
+ *)
 
 let bigAdd l1 l2 = 
   let add (l1, l2) = 
@@ -82,6 +114,11 @@ let bigAdd l1 l2 =
   in 
     removeZero (add (padZero l1 l2))
 
+(* mulByDigit : int -> int list -> int list
+ * 
+ * Multiply a digit with a big int
+ *)
+
 let rec mulByDigit i l = 
   let f a x = 
     let (c, r) = a in
@@ -92,6 +129,11 @@ let rec mulByDigit i l =
   let (_, res) = List.fold_left f base (List.rev (0 :: l)) in
   
   removeZero res
+
+(* bigMul : int list -> int list -> int list
+ * 
+ * Multiply two big integers represented as int lists
+ *)
 
 let bigMul l1 l2 = 
   let f a x = 
