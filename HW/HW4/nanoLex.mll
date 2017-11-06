@@ -11,6 +11,31 @@ rule token = parse
   | "let"        { LET }
   | "="          { EQ }
   (* ADD LEXING RULES FOR OTHER TOKENS HERE *)
+  | "true"       { TRUE }
+  | "false"      { FALSE }
+  | "rec"        { REC }
+  | "in"         { IN }
+  | "fun"        { FUN }
+  | "->"         { ARROW }
+  | "if"         { IF }
+  | "then"       { THEN }
+  | "else"       { ELSE }
+
+  | "+"          { PLUS }
+  | "-"          { MINUS }
+  | "*"          { MUL }
+  | "/"          { DIV }
+  | "<"          { LT }
+  | "<="         { LE }
+  | "!="         { NE }
+  | "&&"         { AND }
+  | "||"         { OR }
+  | "("          { LPAREN }
+  | ")"          { RPAREN }
+  | "["          { LBRAC }
+  | "]"          { RBRAC }
+  | ";"          { SEMI } 
+  | "::"         { COLONCOLON }
 
   | digit+ as i                   { Num (int_of_string i) }
   (* Note: The order of these rules matter, so keep Id after all other lexemes *)

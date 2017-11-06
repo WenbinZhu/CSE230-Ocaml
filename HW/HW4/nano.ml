@@ -93,6 +93,8 @@ and exprToString e =
     | Letrec (x,e1,e2) -> 
         Printf.sprintf "let rec %s = %s in \n %s" 
         x (exprToString e1) (exprToString e2) 
+    | NilExpr -> 
+        "[]"
 
 (*********************** Some helpers you might need ***********************)
 
@@ -105,8 +107,81 @@ let listAssoc (k,l) =
 
 (*********************** Your code starts here ****************************)
 
-let lookup (x,evn) = failwith "to be written"
+(* lookup: string * env -> value
+ * 
+ * Finds the most recent binding for a variable
+ *)
+let lookup (x,evn) = 
+    match listAssoc (x,evn) with 
+    | Some v -> v
+    | None -> raise (MLFailure ("variable not bound: " ^ x))
 
-let rec eval (evn,e) = failwith "to be written"
+(* eval : env * expr -> value
+ * 
+ * Evaluates an ML-nano expression e in the environment evn
+ *)
+let rec eval (evn,e) = 
+    match e with 
+    | NilExpr -> Nil
+    | Const i -> Int i
+    | True -> Bool true
+    | False -> Bool false
+    | Var s -> lookup (s, evn)
+    | Let (s, e1, e2) -> eval ((s, eval (evn, e1)) :: evn, e2)
+    | Letrec (s, e1, e2) -> 
+        (match e1 with
+        | Fun (_s, expr) -> eval ((s, Closure (evn, Some s, _s, expr)) :: evn, e2)
+        | _ -> eval ((s, eval (evn, e1)) :: evn, e2))
+    | Fun (s, e1) -> Closure (evn, None, s, e1)
+    | App (f, e1) -> 
+        (match f with 
+        | Var "hd" -> 
+            (match eval (evn, e1) with 
+            | Pair (Int a, _) -> Int a
+            | Pair (Bool a, _) -> Bool a
+            | _ -> raise (MLFailure "Invalid expression"))
+        | Var "tl" ->
+            (match eval (evn, e1) with 
+            | Pair (Int _, Nil) -> Nil
+            | Pair (Bool _, Nil) -> Nil
+            | Pair (Int _, Pair (Int a, b)) -> Pair (Int a, b)
+            | Pair (Bool _, Pair (Bool a, b)) -> Pair (Bool a, b)
+            | _ -> raise (MLFailure "Invalid expression"))
+        | _ -> 
+            (let c = eval (evn, f) in 
+            match c with 
+            | Closure (_evn, name, formal, expr) -> 
+                (let v = eval (evn, e1) in 
+                match name with 
+                | None -> eval ((formal, v) :: _evn, expr)
+                | Some s -> eval ((s, c) :: (formal, v) :: _evn, expr))
+            | _ -> raise (MLFailure "Invalid expression")))
+    | If (e1, e2, e3) -> 
+        (let v1 = eval (evn, e1) in
+        match v1 with 
+        | Bool true -> eval (evn, e2)
+        | Bool false -> eval (evn, e3)
+        | _ -> raise (MLFailure "Invalid expression"))
+    | Bin (e1, op, e2) -> 
+        (let v1 = eval (evn, e1) in
+        let v2 = eval (evn, e2) in
+        match (v1, op, v2) with 
+        | (Int a, Plus, Int b) -> Int (a + b) 
+        | (Int a, Minus, Int b) -> Int (a - b)
+        | (Int a, Mul, Int b) -> Int (a * b)
+        | (Int a, Div, Int b) -> Int (a / b)
+        | (Int a, Eq, Int b) -> Bool (a = b)
+        | (Int a, Ne, Int b) -> Bool (a != b)
+        | (Int a, Lt, Int b) -> Bool (a < b)
+        | (Int a, Le, Int b) -> Bool (a <= b)
+        | (Bool a, Eq, Bool b) -> Bool (a = b)
+        | (Bool a, Ne, Bool b) -> Bool (a != b)
+        | (Bool a, And, Bool b) -> Bool (a && b)
+        | (Bool a, Or, Bool b) -> Bool (a || b)
+        | (Int a, Cons, Nil) -> Pair (Int a, Nil)
+        | (Int a, Cons, Pair (Int b, c)) -> Pair (Int a, Pair (Int b, c))
+        | (Bool a, Cons, Nil) -> Pair (Bool a, Nil)
+        | (Bool a, Cons, Pair (Bool b, c)) -> Pair (Bool a, Pair (Bool b, c))
+        | _ -> raise (MLFailure "Invalid expression"))
 
 (**********************     Testing Code  ******************************)
