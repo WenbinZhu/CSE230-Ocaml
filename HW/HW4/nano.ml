@@ -135,17 +135,14 @@ let rec eval (evn,e) =
     | Fun (s, e1) -> Closure (evn, None, s, e1)
     | App (f, e1) -> 
         (match f with 
-        | Var "hd" -> 
+        | Var "hd" ->  
             (match eval (evn, e1) with 
-            | Pair (Int a, _) -> Int a
-            | Pair (Bool a, _) -> Bool a
+            | Pair (a, _) -> a
             | _ -> raise (MLFailure "Invalid expression"))
         | Var "tl" ->
             (match eval (evn, e1) with 
-            | Pair (Int _, Nil) -> Nil
-            | Pair (Bool _, Nil) -> Nil
-            | Pair (Int _, Pair (Int a, b)) -> Pair (Int a, b)
-            | Pair (Bool _, Pair (Bool a, b)) -> Pair (Bool a, b)
+            | Pair (_, Nil) -> Nil
+            | Pair (_, Pair (a, b)) -> Pair (a, b)
             | _ -> raise (MLFailure "Invalid expression"))
         | _ -> 
             (let c = eval (evn, f) in 
@@ -178,10 +175,8 @@ let rec eval (evn,e) =
         | (Bool a, Ne, Bool b) -> Bool (a != b)
         | (Bool a, And, Bool b) -> Bool (a && b)
         | (Bool a, Or, Bool b) -> Bool (a || b)
-        | (Int a, Cons, Nil) -> Pair (Int a, Nil)
-        | (Int a, Cons, Pair (Int b, c)) -> Pair (Int a, Pair (Int b, c))
-        | (Bool a, Cons, Nil) -> Pair (Bool a, Nil)
-        | (Bool a, Cons, Pair (Bool b, c)) -> Pair (Bool a, Pair (Bool b, c))
+        | (a, Cons, Nil) -> Pair (a, Nil)
+        | (a, Cons, Pair (b, c)) -> Pair (a, Pair (b, c))
         | _ -> raise (MLFailure "Invalid expression"))
 
 (**********************     Testing Code  ******************************)
