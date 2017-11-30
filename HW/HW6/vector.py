@@ -62,8 +62,15 @@ class Vector(object):
 
     def __setitem__(self, i, v):
         """Set the ith element of the vector to the specified value, also supports slice level access"""
+        if type(i) == slice:
+            copy = self.data[:]
+            copy[i] = v
+            if len(copy) != len(self.data):
+                raise ValueError("slice operation should not chage vector length")
         try:
             self.data[i] = v
+        except TypeError, e:
+            raise TypeError("can only assign an iterable")
         except:
             raise IndexError("vector index out of range")
 
